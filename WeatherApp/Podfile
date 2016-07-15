@@ -1,0 +1,24 @@
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '8.0'
+
+target 'WeatherApp' do
+  # Comment this line if you're not using Swift and don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for WeatherApp
+
+pod 'SwiftyJSON', '2.3.1'
+pod 'RealmSwift', '0.102.0'
+pod 'Alamofire', '3.1.3'
+
+  target 'WeatherAppTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'WeatherAppUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end

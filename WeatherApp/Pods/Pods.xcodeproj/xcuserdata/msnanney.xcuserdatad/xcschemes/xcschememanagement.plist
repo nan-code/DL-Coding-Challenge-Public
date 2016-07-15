@@ -14,6 +14,16 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Pods-WeatherAppTests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-WeatherAppUITests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Realm.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -24,25 +34,45 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>SwiftyJSON.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>07D2FE78BF69FC4E962878ED1BFE210F</key>
+		<key>3DD600E1D823FD5CC7066B4B282BC4AD</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>17A8ED653B274F8754507087B02AA717</key>
+		<key>432ECC54282C84882B482CCB4CF227FC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>4B2F30D90D85A544E9EFE2A49D392C25</key>
+		<key>6C9C091FF0D932F403310AAEE5DB9EBF</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>F63B555C204D576EB8D7275074C81382</key>
+		<key>7228FEBB14A1FA2BB4B3508C3C0BBFB0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>7C9A78D6E8B9E04BC0829898A00B5751</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>81D064F8D748A42DD7E555BE7686E366</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>E4A5BBA0BE76217667CEAF8B63B2E5E5</key>
 		<dict>
 			<key>primary</key>
 			<true/>

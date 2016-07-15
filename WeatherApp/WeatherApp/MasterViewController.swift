@@ -2,7 +2,7 @@
 //  MasterViewController.swift
 //  WeatherApp
 //
-//  Created by Matthew Nanney on 7/14/16.
+//  Created by Matthew Nanney on 7/15/16.
 //  Copyright © 2016 Matthew Nanney. All rights reserved.
 //
 
@@ -19,7 +19,7 @@ class MasterViewController: UITableViewController {
         // Do any additional setup after loading the view, typically from a nib.
         self.navigationItem.leftBarButtonItem = self.editButtonItem()
 
-        let addButton = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "insertNewObject:")
+        let addButton = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: #selector(insertNewObject(_:)))
         self.navigationItem.rightBarButtonItem = addButton
         if let split = self.splitViewController {
             let controllers = split.viewControllers
