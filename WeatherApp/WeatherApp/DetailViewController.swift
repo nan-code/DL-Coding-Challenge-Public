@@ -9,8 +9,20 @@
 import UIKit
 
 class DetailViewController: UIViewController {
+    
+    @IBOutlet weak var viewCurrentTemp: UIView!
+    @IBOutlet weak var viewForecast: UIView!
+    @IBOutlet weak var viewForecastType: UIView!
 
-    @IBOutlet weak var detailDescriptionLabel: UILabel!
+    @IBOutlet weak var lblTemperature: UILabel!
+    @IBOutlet weak var lblFeelsLikeTemp: UILabel!
+    @IBOutlet weak var lblCity: UILabel!
+    
+    @IBOutlet weak var imgViewCondition: UIImageView!
+    
+    @IBOutlet weak var collectionViewForecast: UICollectionView!
+    @IBOutlet weak var segControlForecastType: UISegmentedControl!
+    
 
 
     var detailItem: AnyObject? {
@@ -23,9 +35,9 @@ class DetailViewController: UIViewController {
     func configureView() {
         // Update the user interface for the detail item.
         if let detail = self.detailItem {
-            if let label = self.detailDescriptionLabel {
-                label.text = detail.description
-            }
+//            if let label = self.detailDescriptionLabel {
+//                label.text = detail.description
+//            }
         }
     }
 
