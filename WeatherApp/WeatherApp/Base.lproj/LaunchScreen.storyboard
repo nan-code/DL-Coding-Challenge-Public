@@ -26,17 +26,12 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="39Y-WD-XWq">
-                                <rect key="frame" x="282" y="354" width="37" height="37"/>
-                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="0.60881892566966855" green="0.87913770822733794" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstItem="ng2-pw-TFz" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="5As-Cd-9B6"/>
-                            <constraint firstItem="39Y-WD-XWq" firstAttribute="top" secondItem="ng2-pw-TFz" secondAttribute="bottom" constant="8" id="8CP-cD-NtC"/>
                             <constraint firstAttribute="trailing" secondItem="ng2-pw-TFz" secondAttribute="trailing" constant="20" id="FU3-5C-aBD"/>
                             <constraint firstItem="ng2-pw-TFz" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="20" id="nff-gs-J3Z"/>
-                            <constraint firstItem="39Y-WD-XWq" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="pqS-Qu-9Xq"/>
                         </constraints>
                     </view>
                 </viewController>
