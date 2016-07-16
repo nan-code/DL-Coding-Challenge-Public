@@ -10,9 +10,12 @@ import Foundation
 
 class DayForecast : NSObject {
     
-    var dayOfWeek:String?
-    var date:NSDate?
-    var temperature:String?
-    var condition:String?
+    var temperatureF = ""
+    var temperatureC = ""
+    var feelsLikeF = ""
+    var feelsLikeC = ""
+    var dayOfWeek = ""
+    var date = NSDate()
+    var conditionIconUrl = ""
     
 }

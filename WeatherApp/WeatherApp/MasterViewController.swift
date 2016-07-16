@@ -38,6 +38,7 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate {
 
         }
         
+        //initialize loading view
         self.indicator = UIActivityIndicatorView(frame: CGRectMake(0, 0, 40, 40))
         self.indicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Gray
         self.indicator.center = self.view.center

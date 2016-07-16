@@ -12,6 +12,9 @@ import UIKit
 class SearchViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var lblSearch: UILabel!
+    @IBOutlet weak var txtSearch: UITextField!
+    @IBOutlet weak var btnSearch: UIButton!
     
     var searchList = Array<Location>()
     
@@ -48,7 +51,20 @@ class SearchViewController: UIViewController, UITableViewDataSource, UITableView
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("SearchCell", forIndexPath: indexPath) as! SearchTableViewCell
         
+        cell.lblCity.text = "Detroit"
+        cell.lblTemperature.text = "77°F"
+        
         return cell
     }
+    
+    ////////////////////////
+    //MARK:- Extra Functions
+    ////////////////////////
+
+    
+    @IBAction func search(sender: AnyObject){
+        
+    }
+    
 
 }

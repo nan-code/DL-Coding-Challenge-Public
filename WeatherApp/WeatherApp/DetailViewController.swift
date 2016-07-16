@@ -27,7 +27,8 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     @IBOutlet weak var tableViewOverlay: UITableView!
     
     var refreshControl: UIRefreshControl!
-    
+    var loadingView = UIView()
+    var indicator = UIActivityIndicatorView()
     
     var forecastDayList = Array<DayForecast>()
     var currentLocation:Location?
@@ -42,12 +43,7 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func configureView() {
         // Update the user interface for the detail item.
         
-        if let location = self.currentLocation {
-            self.title = location.city
-        }
-        else{
-            self.title = "Current Weather"
-        }
+        self.title = getCityLabel()
     }
 
     override func viewDidLoad() {
@@ -64,6 +60,19 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
         gradient.frame = self.view.frame
         self.view.layer.insertSublayer(gradient, atIndex: 0)
 
+        //initialize loading view
+        self.indicator = UIActivityIndicatorView(frame: CGRectMake(0, 0, 40, 40))
+        self.indicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Gray
+        self.indicator.center = self.view.center
+        let backgroundView = UIVisualEffectView()
+        backgroundView.effect = UIBlurEffect()
+        
+        self.loadingView.addSubview(backgroundView)
+        self.loadingView.addSubview(self.indicator)
+        
+        self.view.addSubview(self.loadingView)
+
+        
         self.segControlForecastType.addTarget(self, action: #selector(DetailViewController.forecastSelected(_:)), forControlEvents: .ValueChanged)
         self.segControlForecastType.tintColor = UIColor.blueColor()
         
@@ -106,11 +115,11 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.getForecastDayCount()
+        return self.forecastDayList.count
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        var dayCount = self.getForecastDayCount()
+        var dayCount = self.forecastDayList.count
         if (dayCount > 5){
             dayCount = 5
         }
@@ -122,13 +131,14 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("ForecastCell", forIndexPath: indexPath) as! ForecastCollectionViewCell
         
-        cell.lblTemperature.text = "75 °F / 31 °C"
+        let forecast = self.forecastDayList[indexPath.item]
+        cell.lblTemperature.text =  "\(forecast.temperatureF)°F / \(forecast.temperatureC) °C"
         cell.lblTemperature.textAlignment = .Center
-        cell.lblDayOfWeek.text = "Monday"
+        cell.lblDayOfWeek.text = "\(forecast.dayOfWeek)"
         cell.lblDayOfWeek.textAlignment = .Center
-        cell.layer.borderColor = UIColor.lightGrayColor().CGColor
-        cell.layer.borderWidth = 0.5
-        
+        if let url = NSURL(string: forecast.conditionIconUrl){
+            cell.imgViewCondition.hnk_setImageFromURL(url)
+        }
         
         return cell
         
@@ -142,62 +152,161 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
         // Make API for up to date current weather.
         
         if let currentLocation = self.currentLocation {
-            self.currentWeatherData(currentLocation) { (resultJSON) in
+            self.currentWeatherData(currentLocation) { (responseJSON) in
                 
-                let currentObv = resultJSON["current_observation"]
-                if let tempF = Double(currentObv["temp_f"].stringValue),
-                    tempC = Double(currentObv["temp_c"].stringValue) {
-                    let temperatureF = String(format:"%.1f", tempF)
-                    let temperatureC = String(format:"%.1f", tempC)
-                    self.lblTemperature.text = temperatureF + "°F (" + temperatureC + "°C)"
-                }
-                if let tempF = Double(currentObv["feelslike_f"].stringValue),
-                    tempC = Double(currentObv["feelslike_c"].stringValue) {
-                    let temperatureF = String(format:"%.1f", tempF)
-                    let temperatureC = String(format:"%.1f", tempC)
-                    self.lblFeelsLikeTemp.text = "Feels Like: " + temperatureF + "°F (" + temperatureC + "°C)"
-
-                }
-                if let icon = currentObv["icon_url"].string {
-                    let url = NSURL(string: icon)!
+                let forecast:DayForecast = self.getCurrentForecast(responseJSON)
+                self.lblTemperature.text = forecast.temperatureF + "°F (" + forecast.temperatureC + "°C)"
+                self.lblFeelsLikeTemp.text = "Feels Like: " + forecast.feelsLikeF + "°F (" + forecast.feelsLikeC + "°C)"
+                if let url = NSURL(string: forecast.conditionIconUrl){
                     self.imgViewCondition.hnk_setImageFromURL(url)
                 }
+
+                self.forecastSelected(self)
+                self.refreshControl.endRefreshing()
+                self.hideLoading()
+            }
+            
+            self.lblCity.text = getCityLabel()
+            self.title = getCityLabel()
+        }
+        
+    }
+    
+    func getCurrentForecast(result: SwiftyJSON.JSON) -> DayForecast {
+        let forecast = DayForecast()
+        
+        let currentObv = result["current_observation"]
+        if let tempF = Double(currentObv["temp_f"].stringValue),
+            tempC = Double(currentObv["temp_c"].stringValue) {
+            forecast.temperatureF = String(format:"%.1f", tempF)
+            forecast.temperatureC = String(format:"%.1f", tempC)
+        }
+        if let tempF = Double(currentObv["feelslike_f"].stringValue),
+            tempC = Double(currentObv["feelslike_c"].stringValue) {
+            forecast.feelsLikeF = String(format:"%.1f", tempF)
+            forecast.feelsLikeC = String(format:"%.1f", tempC)
+        }
+        forecast.conditionIconUrl = currentObv["icon_url"].stringValue
+        
+        return forecast
+    }
+    
+    func getHourlyForecast(result: SwiftyJSON.JSON) -> Array<DayForecast> {
+        var forecasts = Array<DayForecast>()
+
+        if let hours = result["hourly_forecast"].array {
+            for hour in hours {
+                let forecast = DayForecast()
                 
-                let location = currentObv["display_location"]
-                self.lblCity.text = location["full"].stringValue
+                forecast.dayOfWeek = hour["FCTTIME"]["civil"].stringValue
+                
+                if let tempF = Double(hour["temp"]["english"].stringValue),
+                    tempC = Double(hour["temp"]["metric"].stringValue) {
+                    forecast.temperatureF = String(format:"%.1f", tempF)
+                    forecast.temperatureC = String(format:"%.1f", tempC)
+                }
+                if let tempF = Double(hour["feelslike"]["english"].stringValue),
+                    tempC = Double(hour["feelslike"]["metric"].stringValue) {
+                    forecast.feelsLikeF = String(format:"%.1f", tempF)
+                    forecast.feelsLikeC = String(format:"%.1f", tempC)
+                }
+                forecast.conditionIconUrl = hour["icon_url"].stringValue
+                
+                forecasts.append(forecast)
             }
         }
         
-        refreshControl.endRefreshing()
+        return forecasts
     }
+    
+    func getDayForecast(result: SwiftyJSON.JSON) -> Array<DayForecast> {
+        var forecasts = Array<DayForecast>()
+        
+        if let days = result["forecast"]["simpleforecast"]["forecastday"].array {
+            for day in days {
+                let forecast = DayForecast()
+                
+                forecast.dayOfWeek = day["date"]["weekday"].stringValue
+
+                if let tempF = Double(day["high"]["fahrenheit"].stringValue),
+                    tempC = Double(day["low"]["celsius"].stringValue) {
+                    forecast.temperatureF = String(format:"%.1f", tempF)
+                    forecast.temperatureC = String(format:"%.1f", tempC)
+                }
+                if let tempF = Double(day["feelslike"]["fahrenheit"].stringValue),
+                    tempC = Double(day["low"]["celsius"].stringValue) {
+                    forecast.feelsLikeF = String(format:"%.1f", tempF)
+                    forecast.feelsLikeC = String(format:"%.1f", tempC)
+                }
+                forecast.conditionIconUrl = day["icon_url"].stringValue
+                
+                forecasts.append(forecast)
+            }
+        }
+        
+        return forecasts
+    }
+
     
     func forecastSelected(sender: AnyObject){
         //do API call here to get new forecast data and then reload collection view
         
-        self.collectionViewForecast.reloadData()
-    }
-    
-    func getForecastDayCount() -> Int{
-        var dayCount = 3
-        let selectedIndex = self.segControlForecastType.selectedSegmentIndex
-        switch (selectedIndex){
-        case 0:
-            dayCount = 3
-            break
-        case 1:
-            dayCount = 7
-            break
-        case 2:
-            dayCount = 10
-            break
-        default:
-            dayCount = 3
-            break
+        if let currentLocation = self.currentLocation {
+            self.showLoading()
+            let selectedIndex = self.segControlForecastType.selectedSegmentIndex
+            if (selectedIndex == 1){ //3 day
+                self.dailyForecast(currentLocation, completion: { (responseJSON) in
+                    self.forecastDayList.removeAll()
+                    self.forecastDayList.appendContentsOf(self.getDayForecast(responseJSON))
+                    self.reloadForecasts()
+                })
+            }
+            else if (selectedIndex == 2){ //10 day
+                self.tenDayForecast(currentLocation, completion: { (responseJSON) in
+                    self.forecastDayList.removeAll()
+                    self.forecastDayList.appendContentsOf(self.getDayForecast(responseJSON))
+                    self.reloadForecasts()
+                })
+            }
+            else{ //hourly
+                self.hourlyForecast(currentLocation, completion: { (responseJSON) in
+                    self.forecastDayList.removeAll()
+                    self.forecastDayList.appendContentsOf(self.getHourlyForecast(responseJSON))
+                    self.reloadForecasts()
+                })
+            }
+            
         }
-        
-        return dayCount
     }
     
+    func reloadForecasts(){
+        NSOperationQueue.mainQueue().addOperationWithBlock(){
+            self.collectionViewForecast.reloadData()
+            self.hideLoading()
+        }
+    }
+    
+    func getCityLabel() -> String{
+        var city = ""
+        if let currentLocation = self.currentLocation{
+            let state = currentLocation.country_name == "USA" ? currentLocation.state : currentLocation.country_name
+            city = currentLocation.city + ", " + state
+        }
+        return city
+    }
+    
+    func showLoading(){
+        self.indicator.startAnimating()
+        self.loadingView.hidden = false
+        self.view.bringSubviewToFront(self.loadingView)
+    }
+    
+    func hideLoading(){
+        self.loadingView.hidden = true
+        self.view.sendSubviewToBack(self.loadingView)
+        self.indicator.stopAnimating()
+    }
+
     ////////////////////////
     //MARK:- Apple Functions
     ////////////////////////
@@ -211,6 +320,7 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
+        self.showLoading()
         self.refresh(self)
         
         //here reload on view
