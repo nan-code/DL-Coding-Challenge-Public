@@ -10,8 +10,9 @@ import UIKit
 import Realm
 import RealmSwift
 import CoreLocation
+import SwiftyJSON
 
-class MasterViewController: UITableViewController, CLLocationManagerDelegate {
+class MasterViewController: UITableViewController, CLLocationManagerDelegate, AddLocationDelegate {
 
     var detailViewController: DetailViewController? = nil
     var objects = [Location]()
@@ -53,13 +54,13 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate {
         
         handleCurrentLocation()
         
+        self.objects.removeAll()
         
         let realm = try! Realm()
         let locations = realm.objects(Location.self)
         for location in locations {
             self.objects.append(location)
         }
-        
         
 
         let addButton = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: #selector(insertNewObject(_:)))
@@ -86,8 +87,8 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate {
     }
 
     func insertNewObject(sender: AnyObject) {
-        if let storyboard = self.storyboard {
-            let searchViewController = storyboard.instantiateViewControllerWithIdentifier("SearchViewController")
+        if let storyboard = self.storyboard, let searchViewController = storyboard.instantiateViewControllerWithIdentifier("SearchViewController") as? SearchViewController {
+            searchViewController.delegate = self
             self.navigationController?.presentViewController(searchViewController, animated: true, completion: nil)
         }
         
@@ -103,7 +104,7 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate {
                     object = currentLocation
                 }
                 else{
-                    object = objects[indexPath.row]
+                    object = objects[indexPath.row - 1]
                 }
                 let controller = (segue.destinationViewController as! UINavigationController).topViewController as! DetailViewController
                 controller.currentLocation = object
@@ -146,12 +147,15 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate {
     }
 
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if (indexPath.row != 0){
-            let editIndexPath = NSIndexPath(forRow: indexPath.row - 1, inSection: indexPath.section)
-            if editingStyle == .Delete {
-                objects.removeAtIndex(editIndexPath.row)
-                tableView.deleteRowsAtIndexPaths([editIndexPath], withRowAnimation: .Fade)
+        if editingStyle == .Delete {
+            
+            let realm = try! Realm()
+            try! realm.write{
+                realm.delete(objects[indexPath.row - 1])
             }
+            
+            objects.removeAtIndex(indexPath.row - 1)
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         }
     }
     
@@ -181,19 +185,10 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate {
             print("locations = \(locValue.latitude) \(locValue.longitude)")
             locationManager.stopUpdatingLocation()
             
-            self.geoLookup(locValue.latitude, long: locValue.longitude, completion: { (responseJSON) in
+            self.geoLookup("\(locValue.latitude)", long: "\(locValue.longitude)", completion: { (responseJSON) in
                 let geoLocation = responseJSON["location"]
                 
-                let newLocation = Location()
-                newLocation.city = geoLocation["city"].stringValue
-                newLocation.state = geoLocation["state"].stringValue
-                newLocation.country = geoLocation["country"].stringValue
-                newLocation.country_name = geoLocation["country_name"].stringValue
-                newLocation.lat = geoLocation["lat"].stringValue
-                newLocation.lon = geoLocation["lon"].stringValue
-                newLocation.zip = geoLocation["zip"].stringValue
-                newLocation.requesturl = geoLocation["requestUrl"].stringValue
-                
+                let newLocation = self.getNewLocation(geoLocation)
                 self.currentLocation = newLocation
                 
                 NSOperationQueue.mainQueue().addOperationWithBlock(){
@@ -235,6 +230,52 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate {
         self.indicator.stopAnimating()
     }
 
+    func addNewLocation(location: Location){
+        self.geoLookup(location.lat, long: location.lon, completion: { (responseJSON) in
+            let geoLocation = responseJSON["location"]
+            
+            let newLocation = self.getNewLocation(geoLocation)
+            
+            var duplicate = false
+            let realm = try! Realm()
+            let locations = realm.objects(Location.self)
+            for location in locations {
+                if (location.city == newLocation.city && location.state == newLocation.state && location.country_name == newLocation.country_name){
+                    duplicate = true
+                    break
+                }
+            }
+            
+            if (!duplicate){
+                try! realm.write {
+                    realm.add(newLocation)
+                }
+                
+                self.objects.append(newLocation)
+            }
+
+            NSOperationQueue.mainQueue().addOperationWithBlock(){
+                self.tableView.reloadData()
+                self.hideLoading()
+            }
+            
+        })
+    }
     
+    func getNewLocation(locationJSON: SwiftyJSON.JSON) -> Location{
+        let newLocation = Location()
+        newLocation.city = locationJSON["city"].stringValue
+        newLocation.state = locationJSON["state"].stringValue
+        newLocation.country = locationJSON["country"].stringValue
+        newLocation.country_name = locationJSON["country_name"].stringValue
+        newLocation.lat = locationJSON["lat"].stringValue
+        newLocation.lon = locationJSON["lon"].stringValue
+        newLocation.zip = locationJSON["zip"].stringValue
+        newLocation.requesturl = locationJSON["requestUrl"].stringValue
+        
+        return newLocation
+    }
+ 
+
 }
 

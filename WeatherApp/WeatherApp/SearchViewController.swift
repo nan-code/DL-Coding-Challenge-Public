@@ -8,13 +8,21 @@
 
 import Foundation
 import UIKit
+import SwiftyJSON
 
-class SearchViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+protocol AddLocationDelegate: class {
+    func addNewLocation(location: Location)
+}
+
+
+class SearchViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var lblSearch: UILabel!
     @IBOutlet weak var txtSearch: UITextField!
     @IBOutlet weak var btnSearch: UIButton!
+    
+    weak var delegate: AddLocationDelegate?
     
     var searchList = Array<Location>()
     
@@ -31,6 +39,7 @@ class SearchViewController: UIViewController, UITableViewDataSource, UITableView
         gradient.frame = self.view.frame
         self.view.layer.insertSublayer(gradient, atIndex: 0)
         
+        self.txtSearch.delegate = self
         
         self.tableView.backgroundColor = UIColor.clearColor()
         
@@ -51,20 +60,69 @@ class SearchViewController: UIViewController, UITableViewDataSource, UITableView
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("SearchCell", forIndexPath: indexPath) as! SearchTableViewCell
         
-        cell.lblCity.text = "Detroit"
-        cell.lblTemperature.text = "77°F"
+        let location = self.searchList[indexPath.row]
+        
+        cell.lblCity.text = location.city
+        cell.backgroundColor = UIColor.clearColor()
         
         return cell
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let location = self.searchList[indexPath.row]
+        if let delegate = self.delegate {
+            delegate.addNewLocation(location)
+            self.dismissViewControllerAnimated(true, completion: nil)
+        }
     }
     
     ////////////////////////
     //MARK:- Extra Functions
     ////////////////////////
 
+    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+        let newLength = textField.text!.utf16.count + string.utf16.count - range.length
+        
+        if (newLength > 3){
+            search(self)
+        }
+        
+        if (newLength == 0){
+            self.searchList.removeAll()
+            self.tableView.reloadData()
+        }
+        
+        return true
+    }
+
     
     @IBAction func search(sender: AnyObject){
-        
+        if let text = self.txtSearch.text{
+            self.autoCompleteSearch(text, completion: { (responseJSON) in
+                self.searchList.removeAll()
+                self.searchList.appendContentsOf(self.getLocations(responseJSON))
+                self.tableView.reloadData()
+            })
+        }
     }
     
+    func getLocations(json: JSON) -> Array<Location> {
+        var locations = Array<Location>()
+        
+        if let results = json["RESULTS"].array{
+            for result in results {
+                let location = Location()
+                location.city = result["name"].stringValue
+                location.country = result["c"].stringValue
+                location.lat = result["lat"].stringValue
+                location.lon = result["lon"].stringValue
+                
+                locations.append(location)
+            }
+        }
+        
+        return locations
+    }
 
 }
+

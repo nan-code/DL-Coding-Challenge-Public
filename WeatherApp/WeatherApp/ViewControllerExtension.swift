@@ -119,7 +119,7 @@ extension UIViewController {
     }
 
     
-    func geoLookup(lat: CLLocationDegrees, long: CLLocationDegrees, completion: (JSON) -> Void) {
+    func geoLookup(lat: String, long: String, completion: (JSON) -> Void) {
         Alamofire.request(
             .GET,
             "http://api.wunderground.com/api/36e92782e9780dae/geolookup/q/\(lat),\(long).json"
@@ -139,6 +139,31 @@ extension UIViewController {
                 
                 print(JSON(responseJSON))
                 completion(JSON(responseJSON))
+        }
+    }
+    
+    func autoCompleteSearch(query: String, completion: (JSON) -> Void) {
+        if let queryString = query.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet()) {
+            Alamofire.request(
+                .GET,
+                "http://autocomplete.wunderground.com/aq?query=\(queryString)"
+                )
+                .responseJSON { response in
+                    guard response.result.isSuccess else {
+                        print("Error while fetching tags: \(response.result.error)")
+                        completion(JSON(""))
+                        return
+                    }
+                    
+                    guard let responseJSON = response.result.value as? [String: AnyObject] else {
+                        print("Invalid tag information received from service")
+                        completion(JSON(""))
+                        return
+                    }
+                    
+                    print(JSON(responseJSON))
+                    completion(JSON(responseJSON))
+            }
         }
     }
 
