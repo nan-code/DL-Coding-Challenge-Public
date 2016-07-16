@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Haneke
+import SwiftyJSON
 
 class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource {
     
@@ -28,7 +30,7 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     
     
     var forecastDayList = Array<DayForecast>()
-
+    var currentLocation:Location?
 
     var detailItem: AnyObject? {
         didSet {
@@ -39,10 +41,12 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func configureView() {
         // Update the user interface for the detail item.
-        if let detail = self.detailItem {
-//            if let label = self.detailDescriptionLabel {
-//                label.text = detail.description
-//            }
+        
+        if let location = self.currentLocation {
+            self.title = location.city
+        }
+        else{
+            self.title = "Current Weather"
         }
     }
 
@@ -53,9 +57,12 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         //background gradient
         let gradient:GradientLayer = GradientLayer()
-        gradient.colors = [UIColor.blueColor().CGColor, UIColor.cyanColor().CGColor, UIColor.blueColor().CGColor]
-        gradient.frame = self.view.bounds
-        self.view.layer.addSublayer(gradient)
+        gradient.setNeedsDisplay()
+        gradient.colors = [UIColor.blueColor().CGColor, UIColor.cyanColor().CGColor]
+        gradient.center = CGPointMake(self.view.frame.width / 2, self.view.frame.height / 2)
+        gradient.radius = self.view.frame.width + 100
+        gradient.frame = self.view.frame
+        self.view.layer.insertSublayer(gradient, atIndex: 0)
 
         self.segControlForecastType.addTarget(self, action: #selector(DetailViewController.forecastSelected(_:)), forControlEvents: .ValueChanged)
         self.segControlForecastType.tintColor = UIColor.blueColor()
@@ -67,8 +74,6 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
         self.tableViewOverlay.addSubview(refreshControl)
         
         self.collectionViewForecast.backgroundColor = UIColor.clearColor()
-        self.viewForecast.layer.borderWidth = 1
-        self.viewForecast.layer.borderColor = UIColor.blackColor().CGColor
         
     }
     
@@ -121,7 +126,8 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.lblTemperature.textAlignment = .Center
         cell.lblDayOfWeek.text = "Monday"
         cell.lblDayOfWeek.textAlignment = .Center
-        
+        cell.layer.borderColor = UIColor.lightGrayColor().CGColor
+        cell.layer.borderWidth = 0.5
         
         
         return cell
@@ -135,7 +141,32 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func refresh(sender:AnyObject) {
         // Make API for up to date current weather.
         
-        
+        if let currentLocation = self.currentLocation {
+            self.currentWeatherData(currentLocation) { (resultJSON) in
+                
+                let currentObv = resultJSON["current_observation"]
+                if let tempF = Double(currentObv["temp_f"].stringValue),
+                    tempC = Double(currentObv["temp_c"].stringValue) {
+                    let temperatureF = String(format:"%.1f", tempF)
+                    let temperatureC = String(format:"%.1f", tempC)
+                    self.lblTemperature.text = temperatureF + "°F (" + temperatureC + "°C)"
+                }
+                if let tempF = Double(currentObv["feelslike_f"].stringValue),
+                    tempC = Double(currentObv["feelslike_c"].stringValue) {
+                    let temperatureF = String(format:"%.1f", tempF)
+                    let temperatureC = String(format:"%.1f", tempC)
+                    self.lblFeelsLikeTemp.text = "Feels Like: " + temperatureF + "°F (" + temperatureC + "°C)"
+
+                }
+                if let icon = currentObv["icon_url"].string {
+                    let url = NSURL(string: icon)!
+                    self.imgViewCondition.hnk_setImageFromURL(url)
+                }
+                
+                let location = currentObv["display_location"]
+                self.lblCity.text = location["full"].stringValue
+            }
+        }
         
         refreshControl.endRefreshing()
     }
@@ -179,6 +210,8 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+        
+        self.refresh(self)
         
         //here reload on view
     }

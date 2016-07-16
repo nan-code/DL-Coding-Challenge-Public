@@ -17,10 +17,10 @@ class User: Object {
 //    return []
 //  }
     
-    var userId:String?
-    var userName:String?
-    var lastLoginDt:String?
-    var firstName:String?
-    var lastName:String?
+    var userId:String = ""
+    var userName:String = ""
+    var lastLoginDt:String = ""
+    var firstName:String = ""
+    var lastName:String = ""
 
 }

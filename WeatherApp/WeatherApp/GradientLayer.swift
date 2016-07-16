@@ -13,6 +13,8 @@ class GradientLayer: CALayer {
     
     override init(){
         super.init()
+        
+        needsDisplayOnBoundsChange = true
     }
     
     init(center:CGPoint,radius:CGFloat,colors:[CGColor]){

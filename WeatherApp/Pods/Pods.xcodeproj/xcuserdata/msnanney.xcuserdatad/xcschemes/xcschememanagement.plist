@@ -9,6 +9,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>HanekeSwift.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-WeatherApp.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -42,6 +47,21 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>04226A974D4F0466A73B4AFA3A4C8CEF</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>2C2B1953A91633859BF7AD238FF567A0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>2DBBAC2CBF079F8D050D5D954EFFB8FB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>3DD600E1D823FD5CC7066B4B282BC4AD</key>
 		<dict>
 			<key>primary</key>
@@ -52,12 +72,7 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>6C9C091FF0D932F403310AAEE5DB9EBF</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>7228FEBB14A1FA2BB4B3508C3C0BBFB0</key>
+		<key>7254F078860EA8343B922FC276C036D8</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -67,12 +82,7 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>81D064F8D748A42DD7E555BE7686E366</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>E4A5BBA0BE76217667CEAF8B63B2E5E5</key>
+		<key>8648FFF16EF0EBC21BCE2B005C3903CF</key>
 		<dict>
 			<key>primary</key>
 			<true/>

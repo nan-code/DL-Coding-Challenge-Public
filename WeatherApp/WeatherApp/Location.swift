@@ -18,21 +18,21 @@ class Location: Object {
 //  }
     
     
-    var type:String?
-    var country:String?
-    var country_iso3166:String?
-    var country_name:String?
-    var state:String?
-    var city:String?
-    var tz_short:String?
-    var tz_long:String?
-    var lat:String?
-    var lon:String?
-    var zip:String?
-    var magic:String?
-    var wmo:String?
-    var l:String?
-    var requesturl:String?
-    var wuiurl:String?
-
+    var type:String = ""
+    var country:String = ""
+    var country_iso3166:String = ""
+    var country_name:String = ""
+    var state:String = ""
+    var city:String = ""
+    var tz_short:String = ""
+    var tz_long:String = ""
+    var lat:String = ""
+    var lon:String = ""
+    var zip:String = ""
+    var magic:String = ""
+    var wmo:String = ""
+    var l:String = ""
+    var requesturl:String = ""
+    var wuiurl:String = ""
+    
 }
