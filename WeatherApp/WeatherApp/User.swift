@@ -17,10 +17,10 @@ class User: Object {
 //    return []
 //  }
     
-    var userId:String = ""
-    var userName:String = ""
-    var lastLoginDt:String = ""
-    var firstName:String = ""
-    var lastName:String = ""
+    dynamic var userId:String = ""
+    dynamic var userName:String = ""
+    dynamic var lastLoginDt:String = ""
+    dynamic var firstName:String = ""
+    dynamic var lastName:String = ""
 
 }

@@ -74,7 +74,7 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         
         self.segControlForecastType.addTarget(self, action: #selector(DetailViewController.forecastSelected(_:)), forControlEvents: .ValueChanged)
-        self.segControlForecastType.tintColor = UIColor.blueColor()
+        self.segControlForecastType.tintColor = UIColor.whiteColor()
         
         
         self.refreshControl = UIRefreshControl()

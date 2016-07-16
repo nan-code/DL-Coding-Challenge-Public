@@ -33,11 +33,28 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate, Ad
             navigationController.navigationBar.setBackgroundImage(UIImage(), forBarMetrics: .Default)
             navigationController.navigationBar.shadowImage = UIImage()
             navigationController.navigationBar.translucent = true
+            navigationController.navigationBar.tintColor = UIColor.whiteColor()
             
             let titleDict: [String: AnyObject] = [NSForegroundColorAttributeName: UIColor.whiteColor()]
             navigationController.navigationBar.titleTextAttributes = titleDict
 
         }
+        
+        self.tableView.contentInset = UIEdgeInsetsMake(44,0,0,0);
+        
+        //background gradient
+        let gradient:GradientLayer = GradientLayer()
+        gradient.setNeedsDisplay()
+        gradient.colors = [UIColor.blueColor().CGColor, UIColor.cyanColor().CGColor]
+        gradient.center = CGPointMake(self.view.frame.width / 2, self.view.frame.height / 2)
+        gradient.radius = self.view.frame.width + 100
+        gradient.frame = self.view.frame
+
+        let gradientView = UIView()
+        gradientView.layer.insertSublayer(gradient, atIndex: 0)
+
+        self.tableView.backgroundView = gradientView
+
         
         //initialize loading view
         self.indicator = UIActivityIndicatorView(frame: CGRectMake(0, 0, 40, 40))
@@ -127,6 +144,8 @@ class MasterViewController: UITableViewController, CLLocationManagerDelegate, Ad
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
 
+        cell.backgroundColor = UIColor.clearColor()
+        
         if (indexPath.row != 0){
             let index = indexPath.row - 1
             let object = objects[index]
